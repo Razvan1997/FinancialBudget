@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             x:Class="Dollet.Views.TransactionCategoriesView"
+             x:Name="This" 
+             Style="{StaticResource TransactionCategoriesStyle}">
+
+    <VerticalStackLayout Spacing="5">
+        <toolkit:AvatarView
+            Padding="10"
+            FontSize="40"
+            FontFamily="MaterialIconsRegular"
+            MinimumHeightRequest="70"
+            MinimumWidthRequest="70"
+            Text="{Binding Icon, Source={x:Reference This}}"
+            BackgroundColor="{Binding Color, Source={x:Reference This}}"
+            BorderColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"/>
+
+        <Label 
+            x:Name="CategoryLabel"
+            Text="{Binding Name, Source={x:Reference This}}"
+            HorizontalTextAlignment="Center"/>
+
+        <Border x:Name="Underline" StrokeThickness="2"/>
+    </VerticalStackLayout>
+</ContentView>

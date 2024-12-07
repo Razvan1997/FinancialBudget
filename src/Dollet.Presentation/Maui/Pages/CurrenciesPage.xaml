@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:views="clr-namespace:Dollet.Views"
+             xmlns:viewModels="clr-namespace:Dollet.ViewModels"
+             xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+             xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+             x:Class="Dollet.Pages.CurrenciesPage"
+             x:DataType="viewModels:CurrenciesPageViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding AppearingCommand}"/>
+    </ContentPage.Behaviors>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem 
+            IsEnabled="{Binding IsChangeCurrencyEnabled}"
+            Command="{Binding ChangeDefaultCurrencyCommand}">
+
+            <ToolbarItem.IconImageSource>
+                <FontImageSource 
+                    FontFamily="MaterialIconsRegular"
+                    Size="26"
+                    Glyph="{x:Static fonts:MaterialDesignIcons.Save}"
+                    Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}"/>
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <views:RoundedTopElement Data="M 0,0 L 100,0 C 50,20 0,0 0,0 Z"/>
+
+        <CollectionView 
+            Margin="0, 35, 0, 0"
+            SelectionMode="Single"
+            ItemsSource="{Binding Currencies}"
+            SelectedItem="{Binding SelectedCurrency}"
+            SelectionChangedCommand="{Binding DefaultCurrencyChangedCommand}">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Currency">
+                    <Grid>
+                        <HorizontalStackLayout 
+                            Padding="15"
+                            Spacing="15">
+
+                            <Label Text="{Binding Code}"/>
+                            <Label Text="{Binding Name}"/>
+                        </HorizontalStackLayout>
+
+                        <Line 
+                            Stroke="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource Primary}}" 
+                            X2="{Binding Width, Source={RelativeSource Self}}" 
+                            HorizontalOptions="Fill" 
+                            StrokeThickness="1" />
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup Name="CommonStates">
+                                    <VisualState Name="Normal"/>
+                                    <VisualState Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryLight}, Dark={StaticResource Primary}}"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

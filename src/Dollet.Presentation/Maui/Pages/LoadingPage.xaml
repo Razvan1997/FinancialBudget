@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewmodels="clr-namespace:Dollet.ViewModels"
+             x:Class="Dollet.Pages.LoadingPage"
+             x:DataType="viewmodels:LoadingPageViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding AppearingCommand}"/>
+    </ContentPage.Behaviors>
+
+    <VerticalStackLayout VerticalOptions="Center" Spacing="20">
+        <ActivityIndicator 
+            IsRunning="{Binding IsBusy}"
+            MaximumWidthRequest="80"/>
+
+        <Label 
+            Text="Initializing..."
+            HorizontalOptions="Center"
+            FontSize="20"
+            IsVisible="{Binding IsBusy}"/>
+    </VerticalStackLayout>
+</ContentPage>

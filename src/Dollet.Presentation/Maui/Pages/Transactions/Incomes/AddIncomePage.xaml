@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.Transactions.Incomes.AddIncomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels.Transactions.Incomes"
+    xmlns:views="clr-namespace:Dollet.Views"
+    Title="Venituri noi"
+    x:DataType="viewModels:AddIncomePageViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <Grid>
+        <views:RoundedTopElement />
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <ScrollView Margin="0,30,0,0">
+                <VerticalStackLayout Padding="20,10" Spacing="15">
+                    <Label Text="Cantiate" />
+                    <Entry
+                        Keyboard="Numeric"
+                        Placeholder="0.00"
+                        ReturnType="Done"
+                        Text="{Binding Amount, Mode=OneWayToSource}" />
+
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="*, *">
+                        <Label Text="Cont" />
+                        <Picker
+                            Title="Selecteaza cont"
+                            Grid.Row="1"
+                            ItemDisplayBinding="{Binding Name}"
+                            ItemsSource="{Binding Accounts}"
+                            SelectedItem="{Binding SelectedAccount}" />
+
+                        <Label Grid.Column="1" Text="Date" />
+                        <DatePicker
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Date="{Binding Date, Mode=OneWayToSource}"
+                            HorizontalOptions="Start"
+                            MaximumDate="{Binding MaximumDate}"
+                            WidthRequest="70" />
+                    </Grid>
+
+                    <Label Text="Cateogrie" />
+                    <CollectionView
+                        ItemsSource="{Binding Categories}"
+                        SelectedItem="{Binding SelectedCategory}"
+                        SelectionMode="Single">
+
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout
+                                HorizontalItemSpacing="10"
+                                Orientation="Horizontal"
+                                Span="2"
+                                VerticalItemSpacing="10" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Category">
+                                <views:TransactionCategoriesView
+                                    Name="{Binding Name}"
+                                    Icon="{Binding Icon}"
+                                    Color="{Binding Color}" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Comentariu" />
+                    <Entry Placeholder="Introduceți comentariul privind veniturile..." Text="{Binding Comment, Mode=OneWayToSource}" />
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Button
+                Grid.Row="1"
+                Margin="20"
+                Command="{Binding AddIncomeCommand}"
+                Text="Adauga" />
+        </Grid>
+    </Grid>
+</ContentPage>

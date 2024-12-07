@@ -1,0 +1,209 @@
+<Shell
+    x:Class="Dollet.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:categoryPages="clr-namespace:Dollet.Pages.Categories"
+    xmlns:expensesPages="clr-namespace:Dollet.Pages.Transactions.Expenses"
+    xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+    xmlns:incomesPages="clr-namespace:Dollet.Pages.Transactions.Incomes"
+    xmlns:local="clr-namespace:Dollet"
+    xmlns:pages="clr-namespace:Dollet.Pages"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels"
+    x:DataType="viewModels:AppShellViewModel"
+    FlyoutBackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                            Dark={StaticResource Gray900}}"
+    Shell.FlyoutBehavior="Flyout">
+    <Shell.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding NavigatedCommand}" EventName="Navigated" />
+    </Shell.Behaviors>
+
+    <Shell.ToolbarItems>
+        <ToolbarItem
+            Command="{Binding LogoutCommand}"
+            IconImageSource="{x:Static fonts:MaterialDesignIcons.Logout}"
+            IsEnabled="{Binding IsLogoutVisible}"
+            Text="Deconectare" />
+    </Shell.ToolbarItems>
+
+    <Shell.FlyoutHeader FlyoutHeaderBehavior="CollapseOnScroll">
+        <VerticalStackLayout>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Label
+                    Grid.RowSpan="2"
+                    Padding="15"
+                    FontFamily="MaterialIconsRegular"
+                    FontSize="80"
+                    Text="{x:Static fonts:MaterialDesignIcons.Account_circle}" />
+
+                <Label
+                    Grid.Column="1"
+                    FontSize="24"
+                    Text="Username"
+                    VerticalOptions="End" />
+
+                <Label
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    VerticalOptions="Start">
+
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{Binding Balance, StringFormat='{0:F2}'}" />
+                            <Span Text="{Binding Currency, StringFormat=' {0}'}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Grid>
+
+            <Border />
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
+
+    <!--<FlyoutItem Route="LoginPage" Shell.FlyoutItemIsVisible="False">
+
+        <ShellContent ContentTemplate="{DataTemplate pages:LoginPage}" />
+    </FlyoutItem>-->
+
+    <FlyoutItem Route="LoadingPage" Shell.FlyoutItemIsVisible="False">
+
+        <ShellContent ContentTemplate="{DataTemplate pages:LoadingPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Conturi" Route="AccountsPage">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Account_balance}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <ShellContent Title="Conturi" ContentTemplate="{DataTemplate pages:AccountsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem
+        x:Name="CategoriesFlyoutItem"
+        Title="Categorii"
+        Route="CategoriesPage">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Category}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <Tab>
+            <ShellContent
+                Title="Cheltuieli"
+                ContentTemplate="{DataTemplate categoryPages:ExpenseCategoriesPage}"
+                Route="ExpenseCategoriesPage" />
+
+            <ShellContent
+                Title="Venituri"
+                ContentTemplate="{DataTemplate categoryPages:IncomeCategoriesPage}"
+                Route="IncomeCategoriesPage" />
+        </Tab>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Tranzactii">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Wallet}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <Tab>
+            <ShellContent Title="Cheltuieli" ContentTemplate="{DataTemplate expensesPages:ExpensesPage}" />
+
+            <ShellContent Title="Venituri" ContentTemplate="{DataTemplate incomesPages:IncomesPage}" />
+        </Tab>
+    </FlyoutItem>
+
+    <FlyoutItem Title="Monede" Route="CurrenciesPage" x:Name="MonedeFlyoutItem">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Currency_exchange}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <ShellContent Title="Monede" ContentTemplate="{DataTemplate pages:CurrenciesPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem
+        Title="Portofele"
+        IsEnabled="False"
+        Route="InwestmentsPage">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Home}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <ShellContent Title="Portofele" ContentTemplate="{DataTemplate pages:InwestmentsPage}" />
+    </FlyoutItem>
+
+    <FlyoutItem
+        Title="Setari"
+        x:Name="SetariFlyoutItem"
+        IsEnabled="False"
+        Route="SettingsPage">
+
+        <FlyoutItem.FlyoutIcon>
+            <FontImageSource
+                FontFamily="MaterialIconsRegular"
+                Glyph="{x:Static fonts:MaterialDesignIcons.Settings}"
+                Color="{AppThemeBinding Light={StaticResource Black},
+                                        Dark={StaticResource White}}" />
+        </FlyoutItem.FlyoutIcon>
+
+        <ShellContent Title="Setari" ContentTemplate="{DataTemplate pages:SettingsPage}" />
+    </FlyoutItem>
+
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout>
+            <Border />
+            <Grid Margin="20,0,20,0" ColumnDefinitions="auto, *, auto">
+                <Label
+                    Margin="0,0,30,0"
+                    FontFamily="MaterialIconsRegular"
+                    FontSize="32"
+                    Text="{AppThemeBinding Light={x:Static fonts:MaterialDesignIcons.Light_mode},
+                                           Dark={x:Static fonts:MaterialDesignIcons.Dark_mode}}"
+                    VerticalOptions="Center" />
+                <Label
+                    Grid.Column="1"
+                    Text="Schimba tema"
+                    VerticalOptions="Center" />
+
+                <Switch Grid.Column="2">
+                    <Switch.Behaviors>
+                        <toolkit:EventToCommandBehavior Command="{Binding ChangeAppThemeCommand}" EventName="Toggled" />
+                    </Switch.Behaviors>
+                </Switch>
+            </Grid>
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+</Shell>

@@ -1,0 +1,71 @@
+name: Build and Release .NET MAUI App (CI)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - '.gitignore'
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Keystore file
+        run: |
+          echo "${{ secrets.KEYSTORE_FILE }}" > dollet.keystore.asc
+          gpg -d --passphrase "${{ secrets.KEYSTORE_PASSWORD_GPG }}" --batch dollet.keystore.asc > dollet.keystore
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install .NET MAUI
+        run: dotnet workload install maui
+      - name: Publish
+        run: dotnet publish src/Dollet.Presentation/Maui/Maui.csproj -c Release -f net8.0-android -o output /p:AndroidSigningKeyStore=dollet.keystore /p:AndroidSigningKeyAlias=dollet-gh-actions-key /p:AndroidSigningKeyPass="${{ secrets.KEYSTORE_PASSWORD }}" /p:AndroidSigningStorePass="${{ secrets.KEYSTORE_PASSWORD_ALIAS }}"
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: APK
+          path: output/**/*.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: APK
+          path: output
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::$(date +"%Y.%m.%d_%H-%M")"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          release_name: Release ${{ steps.tag.outputs.release_tag }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: output/gwalus.dollet-Signed.apk
+          asset_name: dollet.apk
+          asset_content_type: application/vnd.android.package-archive

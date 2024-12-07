@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="Dollet.Pages.Popups.CategorySelectedPopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Name="This"
+    CanBeDismissedByTappingOutsideOfPopup="True"
+    Color="Transparent">
+
+    <Border
+        Padding="20"
+        BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                          Dark={StaticResource Gray600}}"
+        Stroke="{StaticResource Primary}"
+        StrokeShape="RoundRectangle 20"
+        StrokeThickness="2">
+
+        <VerticalStackLayout Spacing="15">
+            <!--  Numele Categoriei  -->
+            <Label
+                FontAttributes="Bold"
+                FontSize="Medium"
+                HorizontalOptions="Center"
+                Text="{Binding SelectedCategoryName}" />
+
+            <!--  Input pentru buget  -->
+            <Label Text="Introduceți bugetul maxim:" />
+            <Entry
+                HorizontalOptions="FillAndExpand"
+                Keyboard="Numeric"
+                Placeholder="0.00 lei"
+                ReturnType="Next"
+                Text="{Binding BudgetValue, Mode=TwoWay}" />
+
+            <!--  Butoanele de confirmare/anulare  -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Button
+                    BackgroundColor="{StaticResource Primary}"
+                    Command="{Binding ConfirmCommand}"
+                    CommandParameter="{Binding Source={x:Reference This}}"
+                    Text="Confirmați"
+                    TextColor="White" />
+
+                <Button
+                    BackgroundColor="White"
+                    Command="{Binding DismissCommand}"
+                    CommandParameter="{Binding Source={x:Reference This}}"
+                    Text="Anulați"
+                    TextColor="{StaticResource Primary}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

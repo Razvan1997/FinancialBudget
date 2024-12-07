@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.Categories.IncomeCategoriesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+    xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels.Categories"
+    xmlns:views="clr-namespace:Dollet.Views"
+    Title="Categorii"
+    x:DataType="viewModels:IncomeCategoriesPageViewModel">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SaveCommand}" IsEnabled="{Binding IsEnabled}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource
+                    FontFamily="MaterialIconsRegular"
+                    Glyph="{x:Static fonts:MaterialDesignIcons.Save}"
+                    Size="26"
+                    Color="{AppThemeBinding Light={StaticResource White},
+                                            Dark={StaticResource White}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+
+        <toolkit:EventToCommandBehavior Command="{Binding DisappearingCommand}" EventName="Disappearing" />
+    </ContentPage.Behaviors>
+
+    <Grid>
+        <views:RoundedTopElement Data="M 0,0 L 100,0 C 50,20 0,0 0,0 Z" />
+
+        <CollectionView Margin="10" ItemsSource="{Binding Categories}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout
+                    Orientation="Vertical"
+                    Span="3"
+                    VerticalItemSpacing="20" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Category">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid.GestureRecognizers>
+                            <DragGestureRecognizer
+                                CanDrag="True"
+                                DragStartingCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:IncomeCategoriesPageViewModel}}, Path=DragStartingCommand}"
+                                DragStartingCommandParameter="{Binding}" />
+
+                            <DropGestureRecognizer
+                                AllowDrop="True"
+                                DragOverCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:IncomeCategoriesPageViewModel}}, Path=DragOverCommand}"
+                                DragOverCommandParameter="{Binding}"
+                                DropCommand="{Binding Source={RelativeSource AncestorType={x:Type viewModels:IncomeCategoriesPageViewModel}}, Path=DropCommand}" />
+                        </Grid.GestureRecognizers>
+
+                        <toolkit:AvatarView
+                            BackgroundColor="{Binding Color}"
+                            BorderColor="{AppThemeBinding Light={DynamicResource White},
+                                                          Dark={DynamicResource Gray900}}"
+                            FontFamily="MaterialIconsRegular"
+                            FontSize="40"
+                            MinimumHeightRequest="70"
+                            MinimumWidthRequest="70"
+                            Text="{Binding Icon}"
+                            VerticalOptions="Center" />
+
+                        <Label
+                            Grid.Row="1"
+                            Margin="0,5,0,0"
+                            FontAttributes="Bold"
+                            FontSize="Medium"
+                            HorizontalOptions="Center"
+                            Text="{Binding Name}" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

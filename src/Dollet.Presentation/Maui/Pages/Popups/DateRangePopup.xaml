@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup
+    x:Class="Dollet.Pages.Popups.DateRangePopup"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewmodels="clr-namespace:Dollet.ViewModels.Popups"
+    x:Name="This"
+    x:DataType="viewmodels:DateRangePopupViewModel"
+    CanBeDismissedByTappingOutsideOfPopup="True"
+    Color="Transparent">
+
+    <Border
+        BackgroundColor="{AppThemeBinding Light={StaticResource White},
+                                          Dark={StaticResource Gray600}}"
+        Stroke="{StaticResource Primary}"
+        StrokeShape="RoundRectangle 20"
+        StrokeThickness="2">
+
+        <VerticalStackLayout Padding="20">
+            <Grid ColumnDefinitions="auto, auto, auto">
+                <Label
+                    FontAttributes="Italic"
+                    HorizontalOptions="Center"
+                    Text="De la:" />
+                <Label
+                    Grid.Column="2"
+                    FontAttributes="Italic"
+                    HorizontalOptions="Center"
+                    Text="Pana la:" />
+
+                <DatePicker
+                    Grid.Row="1"
+                    Margin="5"
+                    Date="{Binding DateFrom, Mode=TwoWay}"
+                    FontSize="22"
+                    MaximumDate="{Binding MaxDateFrom}" />
+                <Label
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Margin="5"
+                    FontSize="22"
+                    Text="-"
+                    VerticalOptions="Center" />
+                <DatePicker
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    Margin="5"
+                    Date="{Binding DateTo, Mode=TwoWay}"
+                    FontSize="22"
+                    MaximumDate="{Binding MaxDateTo}"
+                    MinimumDate="{Binding DateFrom}" />
+            </Grid>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Button
+                    BorderColor="{AppThemeBinding Dark={StaticResource PrimaryDark}}"
+                    BorderWidth="1"
+                    Command="{Binding ConfirmCommand}"
+                    CommandParameter="{Binding Source={x:Reference This}}"
+                    FontSize="18"
+                    MinimumWidthRequest="30"
+                    Text="Apply" />
+
+                <Button
+                    BackgroundColor="White"
+                    BorderColor="{StaticResource Primary}"
+                    BorderWidth="1"
+                    Command="{Binding DismissCommand}"
+                    CommandParameter="{Binding Source={x:Reference This}}"
+                    FontSize="18"
+                    MinimumWidthRequest="30"
+                    Text="Respingeți"
+                    TextColor="{StaticResource Primary}" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</toolkit:Popup>

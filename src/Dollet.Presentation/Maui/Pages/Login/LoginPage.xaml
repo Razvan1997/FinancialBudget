@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels"
+    Title="Login"
+    x:DataType="viewModels:LoginPageViewModel"
+    BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <Grid RowDefinitions="*, Auto">
+        <!--  Formularul de Login centrat  -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Padding="10"
+            HorizontalOptions="FillAndExpand"
+            Spacing="20"
+            VerticalOptions="CenterAndExpand">
+
+            <!--  Câmp de input pentru Username  -->
+            <Entry
+                Margin="10,0"
+                HeightRequest="50"
+                HorizontalOptions="FillAndExpand"
+                Placeholder="Username"
+                Text="{Binding Username}" />
+
+            <!--  Câmp de input pentru Password  -->
+            <Entry
+                Margin="10,0"
+                HeightRequest="50"
+                HorizontalOptions="FillAndExpand"
+                IsPassword="True"
+                Placeholder="Password"
+                Text="{Binding Password}" />
+
+            <!--  Buton de Login  -->
+            <Button
+                Margin="10,0"
+                BackgroundColor="Green"
+                Command="{Binding LoginCommand}"
+                HeightRequest="50"
+                HorizontalOptions="FillAndExpand"
+                Text="Login"
+                TextColor="White" />
+        </VerticalStackLayout>
+
+        <!--  Footer-ul cu link către Termeni și Condiții  -->
+        <StackLayout
+            Grid.Row="1"
+            Padding="10"
+            HorizontalOptions="Center">
+            <Label
+                GestureRecognizers="{TapGestureRecognizer Tapped='OnTermsTapped'}"
+                Text="Termeni și Condiții"
+                TextColor="Blue"
+                TextDecorations="Underline" />
+        </StackLayout>
+    </Grid>
+</ContentPage>

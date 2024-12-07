@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.Accounts.EditAccountPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+    xmlns:models="clr-namespace:Dollet.ViewModels.Dtos"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels.Accounts"
+    xmlns:views="clr-namespace:Dollet.Views"
+    Title="Editati contul"
+    x:DataType="viewModels:EditAccountPageViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding DeleteCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource
+                    FontFamily="MaterialIconsRegular"
+                    Glyph="{x:Static fonts:MaterialDesignIcons.Delete}"
+                    Size="24"
+                    Color="{AppThemeBinding Light={StaticResource White},
+                                            Dark={StaticResource White}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <views:RoundedTopElement Data="M 0,0 L 100,0 C 50,20 0,0 0,0 Z" />
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <ScrollView Margin="0,30,0,0">
+                <VerticalStackLayout Padding="20,10" Spacing="15">
+                    <Label Text="Cantitate" />
+                    <Entry
+                        Keyboard="Numeric"
+                        Placeholder="0.00"
+                        Text="{Binding Account.Amount, Mode=TwoWay, StringFormat='{0:F2}'}" />
+
+                    <Label Text="Nume" />
+                    <Entry Placeholder="Introduceti numele contului" Text="{Binding Account.Name}">
+
+                        <Entry.Keyboard>
+                            <Keyboard x:FactoryMethod="Create">
+                                <x:Arguments>
+                                    <KeyboardFlags>CapitalizeSentence</KeyboardFlags>
+                                </x:Arguments>
+                            </Keyboard>
+                        </Entry.Keyboard>
+                    </Entry>
+
+                    <Label Text="Descriere" />
+                    <Entry Placeholder="Introduceti descrierea contului" Text="{Binding Account.Description}">
+
+                        <Entry.Keyboard>
+                            <Keyboard x:FactoryMethod="Create">
+                                <x:Arguments>
+                                    <KeyboardFlags>CapitalizeSentence</KeyboardFlags>
+                                </x:Arguments>
+                            </Keyboard>
+                        </Entry.Keyboard>
+                    </Entry>
+
+                    <Label Text="Utilizator" />
+                    <Entry
+                        Placeholder="Utilizator"
+                        ReturnType="Done"
+                        Text="{Binding Username}" />
+
+                    <Label Text="Parola" />
+                    <Entry
+                        Placeholder="Parola"
+                        ReturnType="Done"
+                        Text="{Binding Password}" />
+
+                    <Label Text="Imagine" />
+
+                    <CollectionView
+                        ItemsSource="{Binding Icons}"
+                        SelectedItem="{Binding Account.Icon}"
+                        SelectionMode="Single">
+
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout
+                                HorizontalItemSpacing="5"
+                                Orientation="Horizontal"
+                                Span="2"
+                                VerticalItemSpacing="5" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <HorizontalStackLayout Margin="0,0,5,0" Spacing="5">
+                                    <toolkit:AvatarView
+                                        x:Name="AvatarView"
+                                        Padding="10"
+                                        BorderColor="{DynamicResource Primary}"
+                                        FontFamily="MaterialIconsRegular"
+                                        FontSize="36"
+                                        MinimumHeightRequest="65"
+                                        MinimumWidthRequest="65"
+                                        Text="{Binding}"
+                                        VerticalOptions="Center" />
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup Name="CommonStates">
+                                                <VisualState Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter TargetName="AvatarView" Property="toolkit:AvatarView.BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter TargetName="AvatarView" Property="toolkit:AvatarView.BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Culoare" />
+                    <CollectionView
+                        ItemsSource="{Binding Colors}"
+                        SelectedItem="{Binding Account.Color}"
+                        SelectionMode="Single">
+
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout
+                                HorizontalItemSpacing="5"
+                                Orientation="Horizontal"
+                                Span="2"
+                                VerticalItemSpacing="5" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <HorizontalStackLayout Margin="0,0,5,0" Spacing="5">
+                                    <Grid>
+                                        <Ellipse
+                                            BackgroundColor="{Binding}"
+                                            HeightRequest="65"
+                                            HorizontalOptions="Start"
+                                            WidthRequest="65" />
+
+                                        <Label
+                                            x:Name="ColorCheck"
+                                            FontFamily="MaterialIconsRegular"
+                                            FontSize="40"
+                                            HorizontalOptions="Center"
+                                            IsVisible="False"
+                                            Text="{x:Static fonts:MaterialDesignIcons.Check}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Black},
+                                                                        Dark={StaticResource White}}"
+                                            VerticalOptions="Center"
+                                            ZIndex="1" />
+                                    </Grid>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroupList>
+                                            <VisualStateGroup Name="CommonStates">
+                                                <VisualState Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        <Setter TargetName="ColorCheck" Property="IsVisible" Value="False" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState Name="Selected">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="BackgroundColor" Value="Transparent" />
+                                                        <Setter TargetName="ColorCheck" Property="IsVisible" Value="True" />
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateGroupList>
+                                    </VisualStateManager.VisualStateGroups>
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Categorii" />
+                    <CollectionView
+                        Margin="10"
+                        ItemsSource="{Binding Categories, Mode=TwoWay}"
+                        SelectionMode="None">
+                        <!--  Gestionăm selecția manual  -->
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout
+                                HorizontalItemSpacing="10"
+                                Orientation="Horizontal"
+                                Span="2"
+                                VerticalItemSpacing="10" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:CategoryDto">
+                                <Frame
+                                    Padding="5"
+                                    BackgroundColor="{AppThemeBinding Light={DynamicResource White},
+                                                                      Dark={DynamicResource Gray900}}"
+                                    BorderColor="{Binding IsSelected, Converter={StaticResource BoolToColorConverter}}"
+                                    CornerRadius="10">
+                                    <Frame.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:EditAccountPageViewModel}}, Path=SelectCategoryCommand}" CommandParameter="{Binding}" />
+                                    </Frame.GestureRecognizers>
+
+                                    <VerticalStackLayout>
+                                        <toolkit:AvatarView
+                                            BackgroundColor="{Binding Color}"
+                                            BorderColor="{AppThemeBinding Light={DynamicResource White},
+                                                                          Dark={DynamicResource Gray900}}"
+                                            FontFamily="MaterialIconsRegular"
+                                            FontSize="40"
+                                            MinimumHeightRequest="70"
+                                            MinimumWidthRequest="70"
+                                            Text="{Binding Icon}"
+                                            VerticalOptions="Center" />
+
+                                        <Label
+                                            Margin="0,5,0,0"
+                                            FontAttributes="Bold"
+                                            FontSize="Medium"
+                                            HorizontalOptions="Center"
+                                            Text="{Binding Name}" />
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Moneda" />
+                    <Picker
+                        Title="Selecteaza moneda"
+                        ItemsSource="{Binding Currencies}"
+                        SelectedItem="{Binding SelectedCurrency}" />
+
+                    <Grid
+                        ColumnDefinitions="auto, auto"
+                        ColumnSpacing="15"
+                        RowDefinitions="auto, auto">
+
+                        <Label Text="Ascuns" />
+                        <CheckBox
+                            Grid.Row="1"
+                            Margin="-5,0"
+                            IsChecked="{Binding Account.IsHidden}" />
+
+                        <Label Grid.Column="1" Text="Implicit" />
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Margin="-5,0"
+                            IsChecked="{Binding IsDefault}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <Button
+                Grid.Row="1"
+                Margin="20"
+                Command="{Binding EditAccountCommand}"
+                Text="Salveaza"
+                TextColor="{AppThemeBinding Light={StaticResource Black},
+                                            Dark={StaticResource White}}" />
+        </Grid>
+    </Grid>
+</ContentPage>

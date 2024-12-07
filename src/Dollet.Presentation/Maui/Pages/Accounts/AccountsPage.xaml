@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.AccountsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:Dollet.Conventers"
+    xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+    xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels.Accounts"
+    xmlns:views="clr-namespace:Dollet.Views"
+    xmlns:vmdtos="clr-namespace:Dollet.ViewModels.Dtos"
+    x:DataType="viewModels:AccountsPageViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.Resources>
+        <converters:FirstCharacterConverter x:Key="FirstCharacterConverter" />
+        <toolkit:IsStringNullOrEmptyConverter x:Key="IsStringNullOrEmptyConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="auto, *">
+        <views:RoundedTopElement Data="M 0,0 L 100,0 C 50,60 0,0 0,0 Z" />
+
+        <Border
+            Margin="15"
+            Padding="30"
+            BackgroundColor="{AppThemeBinding Light={DynamicResource White},
+                                              Dark={DynamicResource Gray900}}"
+            StrokeShape="RoundRectangle, 15">
+
+            <Border.Shadow>
+                <Shadow
+                    Brush="Black"
+                    Opacity="0.40"
+                    Offset="0, 15" />
+            </Border.Shadow>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                <Label
+                    FontSize="Title"
+                    Text="Balanta:"
+                    VerticalOptions="Center" />
+                <Label
+                    FontSize="Title"
+                    Text="{Binding AccountsBalance, StringFormat='{0:F2}'}"
+                    VerticalOptions="Center" />
+                <Label
+                    FontSize="Title"
+                    Text="{Binding SelectedCurrency}"
+                    TextColor="{AppThemeBinding Light={DynamicResource Primary},
+                                                Dark={DynamicResource Primary}}"
+                    VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+        <!--  Marker grid for the rounded bottom element  -->
+        <Grid Grid.Row="1">
+            <ScrollView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="1" RowDefinitions="auto, auto, auto">
+                        <CollectionView ItemsSource="{Binding Accounts}" SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vmdtos:AccountDto">
+                                    <Grid
+                                        Padding="5"
+                                        ColumnDefinitions="0.4*, *, 0.5*"
+                                        RowDefinitions="auto, auto">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:AccountsPageViewModel}}, Path=NavigateToEditAccountPageCommand}" CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+
+                                        <Grid Grid.RowSpan="2">
+                                            <toolkit:AvatarView
+                                                BackgroundColor="{Binding Color}"
+                                                BorderColor="{AppThemeBinding Light={DynamicResource White},
+                                                                              Dark={DynamicResource Gray900}}"
+                                                FontFamily="MaterialIconsRegular"
+                                                FontSize="30"
+                                                Text="{Binding Icon}" />
+
+                                            <Label
+                                                Grid.Column="1"
+                                                Margin="0,0,14,1"
+                                                FontFamily="MaterialIconsRegular"
+                                                HorizontalOptions="End"
+                                                IsVisible="{Binding IsDefault}"
+                                                Text="{x:Static fonts:MaterialDesignIcons.Check_circle}"
+                                                TextColor="{DynamicResource Primary}"
+                                                VerticalOptions="End" />
+                                        </Grid>
+
+                                        <Label
+                                            Grid.Column="1"
+                                            FontSize="20"
+                                            Text="{Binding Name}">
+
+                                            <Label.Triggers>
+                                                <DataTrigger
+                                                    Binding="{Binding Description, Converter={StaticResource IsStringNullOrEmptyConverter}}"
+                                                    TargetType="Label"
+                                                    Value="true">
+
+                                                    <Setter Property="Grid.RowSpan" Value="2" />
+                                                    <Setter Property="VerticalOptions" Value="Center" />
+                                                </DataTrigger>
+                                                <DataTrigger
+                                                    Binding="{Binding Description, Converter={StaticResource IsStringNullOrEmptyConverter}}"
+                                                    TargetType="Label"
+                                                    Value="false">
+
+                                                    <Setter Property="Grid.Row" Value="0" />
+                                                    <Setter Property="VerticalOptions" Value="End" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+
+                                        <Label
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            FontAttributes="Italic"
+                                            FontSize="14"
+                                            Text="{Binding Description}"
+                                            VerticalOptions="Center" />
+
+                                        <Label
+                                            Grid.Row="0"
+                                            Grid.Column="2"
+                                            Margin="0,0,15,0"
+                                            FontSize="20"
+                                            HorizontalOptions="End"
+                                            Text="{Binding Amount, StringFormat='{0:F2}'}"
+                                            VerticalOptions="End" />
+
+                                        <Label
+                                            Grid.Row="1"
+                                            Grid.Column="2"
+                                            Margin="0,0,15,0"
+                                            FontSize="14"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Center">
+
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span FontAttributes="Italic" Text="{Binding Currency}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+
+                            <CollectionView.EmptyView>
+                                <views:CollectionEmptyView
+                                    Title="You haven't added any account yet"
+                                    Caption="Add your first account below 🔽"
+                                    CaptionSize="14"
+                                    HeightRequest="80"
+                                    TitleSize="16" />
+                            </CollectionView.EmptyView>
+                        </CollectionView>
+
+                        <Border
+                            Grid.Row="1"
+                            Margin="15,20,15,10"
+                            StrokeThickness="1" />
+
+                        <VerticalStackLayout
+                            Grid.Row="2"
+                            Margin="0,0,0,80"
+                            IsVisible="{Binding IsAddAccountButtonEnabled}">
+
+                            <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+                                <HorizontalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ToogleHiddenAccountsCommand}" />
+                                </HorizontalStackLayout.GestureRecognizers>
+
+                                <Label FontSize="20" Text="Conturi ascunse" />
+
+                                <Label
+                                    FontFamily="MaterialIconsRegular"
+                                    FontSize="20"
+                                    Text="{Binding HiddenAccountsIcon}" />
+                            </HorizontalStackLayout>
+
+                            <CollectionView IsVisible="{Binding HiddenAccountsExpanded}" ItemsSource="{Binding HiddenAccounts}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="vmdtos:AccountDto">
+                                        <Grid Padding="5">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:AccountsPageViewModel}}, Path=NavigateToEditAccountPageCommand}" CommandParameter="{Binding .}" />
+                                            </Grid.GestureRecognizers>
+
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="0.4*" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="0.5*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="auto" />
+                                                <RowDefinition Height="auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <toolkit:AvatarView
+                                                Grid.RowSpan="2"
+                                                BackgroundColor="{Binding Color}"
+                                                FontFamily="MaterialIconsRegular"
+                                                FontSize="30"
+                                                Text="{Binding Icon}" />
+
+                                            <Label
+                                                Grid.Column="1"
+                                                FontSize="20"
+                                                Text="{Binding Name}"
+                                                VerticalOptions="End" />
+
+                                            <Label
+                                                Grid.Row="2"
+                                                Grid.Column="1"
+                                                FontAttributes="Italic"
+                                                FontSize="14"
+                                                Text="{Binding Description}"
+                                                VerticalOptions="Center" />
+
+                                            <Label
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                Margin="0,0,15,0"
+                                                FontSize="20"
+                                                HorizontalOptions="End"
+                                                Text="{Binding Amount, StringFormat='{0:F2}'}"
+                                                VerticalOptions="End" />
+
+                                            <Label
+                                                Grid.Row="1"
+                                                Grid.Column="2"
+                                                Margin="0,0,15,0"
+                                                FontSize="14"
+                                                HorizontalOptions="End"
+                                                VerticalOptions="Center">
+
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span FontAttributes="Italic" Text="{Binding Currency}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+
+                                <CollectionView.EmptyView>
+                                    <views:CollectionEmptyView
+                                        Title="You haven't added any hidden account yet"
+                                        Caption="Add your first hidden account below 🔽"
+                                        CaptionSize="14"
+                                        HeightRequest="100"
+                                        TitleSize="16" />
+                                </CollectionView.EmptyView>
+                            </CollectionView>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Grid>
+            </ScrollView>
+
+            <Button
+                Margin="15"
+                BackgroundColor="{DynamicResource PrimaryLight}"
+                Command="{Binding NavigateToAddAccountPageCommand}"
+                CornerRadius="50"
+                FontFamily="MaterialIconsRegular"
+                FontSize="32"
+                HeightRequest="60"
+                IsVisible="{Binding IsAddAccountButtonEnabled}"
+                Text="{x:Static fonts:MaterialDesignIcons.Add}"
+                VerticalOptions="End"
+                WidthRequest="60"
+                ZIndex="10" />
+        </Grid>
+    </Grid>
+</ContentPage>

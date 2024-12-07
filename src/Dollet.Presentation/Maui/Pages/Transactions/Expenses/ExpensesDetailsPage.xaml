@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:views="clr-namespace:Dollet.Views"
+             xmlns:viewModels="clr-namespace:Dollet.ViewModels.Transactions.Expenses"
+             xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+             xmlns:dtos="clr-namespace:Dollet.Core.DTOs;assembly=Dollet.Core"
+             x:Class="Dollet.Pages.Transactions.Expenses.ExpensesDetailsPage"
+             x:DataType="viewModels:ExpensesDetailsPageViewModel"
+             Title="Cheltuieli">
+
+    <Shell.SearchHandler>
+        <SearchHandler 
+            Placeholder="Căutare de cheltuieli..."
+            SearchBoxVisibility="Collapsible"/>
+    </Shell.SearchHandler>
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding AppearingCommand}"/>
+    </ContentPage.Behaviors>
+
+    <Grid RowDefinitions="auto, *">
+        <views:RoundedTopElement/>
+
+        <CollectionView
+            Grid.Row="2"
+            ItemsSource="{Binding Expenses}"
+            IsGrouped="true">
+
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="dtos:ExpensesDetailsGroupDto">
+                    <VerticalStackLayout>
+                        <Label 
+                            Text="{Binding Date, StringFormat='{}{0:dd MMMM yyyy}'}"
+                            FontSize="16"
+                            FontAttributes="Bold,Italic" 
+                            Margin="10, 0, 10, 5"
+                            Opacity="0.75"/>
+                        <Border StrokeThickness="1"/>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Expense">
+                    <Grid 
+                        Padding="15, 10, 15, 0" 
+                        ColumnSpacing="10"
+                        RowDefinitions="auto, auto, auto"
+                        ColumnDefinitions="auto, *, auto">
+
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ExpensesDetailsPageViewModel}}, 
+                                    Path=GoToEditExpenseCommand}"
+                                CommandParameter="{Binding}"/>
+                        </Grid.GestureRecognizers>
+
+                        <toolkit:AvatarView 
+                            Grid.RowSpan="2"
+                            FontSize="26"
+                            Text="{Binding Category.Icon}"
+                            FontFamily="MaterialIconsRegular"
+                            BackgroundColor="{Binding Category.Color}"/>
+
+                        <Label 
+                            Grid.Column="1"
+                            VerticalOptions="End"
+                            FontAttributes="Bold"
+                            Text="{Binding Category.Name}" />
+
+                        <Label 
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            VerticalOptions="Center"
+                            Text="{Binding Account.Name}"/>
+
+                        <Label 
+                            Grid.Column="2"
+                            VerticalOptions="End"
+                            HorizontalOptions="End"
+                            FontAttributes="Bold"
+                            FontSize="15"
+                            Text="{Binding Amount, StringFormat='{0:F2}'}"/>
+
+                        <Label 
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"
+                            FontSize="14"
+                            Text="{Binding Account.Currency}"/>
+
+                        <Label 
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
+                            FontSize="14"
+                            Opacity="0.5"
+                            FontAttributes="Italic">
+
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding Comment}" FontAttributes="Italic"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.GroupFooterTemplate>
+                <DataTemplate>
+                    <Grid Margin="0, 0, 0, 25"/>
+                </DataTemplate>
+            </CollectionView.GroupFooterTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

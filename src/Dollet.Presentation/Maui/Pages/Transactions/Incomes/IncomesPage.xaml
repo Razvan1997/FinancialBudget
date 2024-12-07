@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Dollet.Pages.Transactions.Incomes.IncomesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Dollet.Controls"
+    xmlns:dtos="clr-namespace:Dollet.Core.DTOs;assembly=Dollet.Core"
+    xmlns:fonts="clr-namespace:Dollet.Core.Constants;assembly=Dollet.Core"
+    xmlns:micro="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+    xmlns:models="clr-namespace:Dollet.Core.Entities;assembly=Dollet.Core"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:viewModels="clr-namespace:Dollet.ViewModels.Transactions.Incomes"
+    xmlns:views="clr-namespace:Dollet.Views"
+    x:DataType="viewModels:IncomesPageViewModel">
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior Command="{Binding AppearingCommand}" EventName="Appearing" />
+    </ContentPage.Behaviors>
+
+    <Grid>
+        <views:RoundedTopElement Data="M 0,0 L 100,0 C 50,45 0,0 0,0 Z" />
+
+        <Grid RowDefinitions="auto, auto, *">
+            <HorizontalStackLayout
+                Margin="0,15,0,10"
+                HorizontalOptions="Center"
+                Spacing="5">
+                <CollectionView
+                    ItemsSource="{Binding Periods}"
+                    SelectedItem="{Binding SelectedPeriod}"
+                    SelectionChangedCommand="{Binding PeriodChangedCommand}"
+                    SelectionMode="Single">
+                    s
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout ItemSpacing="10" Orientation="Horizontal" />
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Grid Style="{StaticResource HorizontalPeriodsStyle}">
+                                <Label
+                                    BackgroundColor="Transparent"
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    Text="{Binding ., Converter={StaticResource TransactionsPeriodToStringConverter}}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Button Command="{Binding SelectCustomDateRangeCommand}" Style="{StaticResource DateRangePickerButton}" />
+            </HorizontalStackLayout>
+
+            <Border
+                Grid.Row="1"
+                Margin="10,0"
+                Padding="10"
+                BackgroundColor="{AppThemeBinding Light={DynamicResource White},
+                                                  Dark={DynamicResource Gray900}}"
+                MaximumHeightRequest="250"
+                Stroke="{DynamicResource PrimaryDark}"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle BackgroundColor="Black" CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout>
+                    <Label
+                        Padding="5"
+                        FontAttributes="Italic"
+                        FontSize="20"
+                        HorizontalOptions="Center"
+                        Text="{Binding Period}" />
+
+                    <micro:ChartView
+                        BackgroundColor="{AppThemeBinding Light={DynamicResource White},
+                                                          Dark={DynamicResource Gray900}}"
+                        Chart="{Binding DonutChart}"
+                        MinimumHeightRequest="200" />
+                </VerticalStackLayout>
+            </Border>
+
+            <CollectionView
+                Grid.Row="2"
+                Margin="0,0,0,20"
+                ItemsSource="{Binding Incomes}">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="dtos:IncomesGroupDto">
+                        <views:TransactionGroupItemView BindingContext="{Binding}">
+
+                            <views:TransactionGroupItemView.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:IncomesPageViewModel}}, Path=NavigateToIncomesDetailsPageCommand}" CommandParameter="{Binding}" />
+                            </views:TransactionGroupItemView.GestureRecognizers>
+                        </views:TransactionGroupItemView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+                <CollectionView.EmptyView>
+                    <views:CollectionEmptyView Title="Niciun rezultat nu corespunde filtrului dvs" Caption="Adăugați prima tranzacție mai jos 🔽" />
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+            <Button
+                Grid.Row="2"
+                Margin="0,0,0,30"
+                BackgroundColor="{DynamicResource PrimaryLight}"
+                Command="{Binding NavigateToAddIncomePageCommand}"
+                CornerRadius="50"
+                FontFamily="MaterialIconsRegular"
+                FontSize="32"
+                HeightRequest="60"
+                Text="{x:Static fonts:MaterialDesignIcons.Add}"
+                VerticalOptions="End"
+                WidthRequest="60"
+                ZIndex="1" />
+        </Grid>
+    </Grid>
+</ContentPage>
