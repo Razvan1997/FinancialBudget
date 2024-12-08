@@ -66,7 +66,6 @@ namespace Dollet.ViewModels.Transactions.Expenses
             else
             {
                 selectedAccount.Amount -= Amount;
-
                 _unitOfWork.AccountRepository.Update(selectedAccount);
                 _unitOfWork.ExpensesRepository.Add(new Expense
                 {
@@ -76,13 +75,20 @@ namespace Dollet.ViewModels.Transactions.Expenses
                     Date = Date,
                     Comment = Comment
                 });
-                await _unitOfWork.CommitAsync();
 
-                await Toast
-                    .Make("Added", ToastDuration.Long)
-                    .Show();
+                try
+                {
+                    await _unitOfWork.CommitAsync();
+                    await Toast
+                   .Make("Added", ToastDuration.Long)
+                   .Show();
 
-                await Shell.Current.GoToAsync("..");
+                    await Shell.Current.GoToAsync("..");
+                }
+                catch(Exception ex)
+                {
+
+                }
             }
         }
     }

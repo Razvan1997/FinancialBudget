@@ -70,6 +70,7 @@ namespace Dollet.ViewModels.Popups
             {
                 if (editMode)
                 {
+                    var allCategoriesExpenses = await _unitOfWork.CategoryRepository.GetAllAsync();
                     var categories = await _unitOfWork.AccountCategoryRepository.GetCategoriesByAccountIdAsync(accountId);
                     var currentCategory = categories.FirstOrDefault(x => x.CategoryId == categoryId);
                     if (currentCategory != null)
@@ -79,6 +80,15 @@ namespace Dollet.ViewModels.Popups
                         {
                             SelectedCategoryName = Category.Name;
                             BudgetValue = currentCategory.Budget;
+                        }
+                    }
+                    else
+                    {
+                        Category = allCategoriesExpenses.FirstOrDefault(x => x.Id == categoryId);
+                        if (Category != null)
+                        {
+                            SelectedCategoryName = Category.Name;
+                            BudgetValue = 0;
                         }
                     }
                 }

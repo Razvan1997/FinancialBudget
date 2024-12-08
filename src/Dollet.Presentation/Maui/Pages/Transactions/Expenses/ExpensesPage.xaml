@@ -27,6 +27,7 @@
             <HorizontalStackLayout
                 Margin="0,15,0,10"
                 HorizontalOptions="Center"
+                IsVisible="{Binding IsVisiblePeriods}"
                 Spacing="5">
                 <CollectionView
                     ItemsSource="{Binding Periods}"
@@ -60,6 +61,7 @@
                 Padding="10"
                 BackgroundColor="{AppThemeBinding Light={DynamicResource White},
                                                   Dark={DynamicResource Gray900}}"
+                IsVisible="{Binding IsVisiblePeriods}"
                 MaximumHeightRequest="250"
                 Stroke="{DynamicResource PrimaryDark}"
                 StrokeThickness="1">

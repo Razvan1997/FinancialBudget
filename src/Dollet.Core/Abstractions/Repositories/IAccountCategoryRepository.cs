@@ -39,5 +39,7 @@ namespace Dollet.Core.Abstractions.Repositories
         /// <param name="categories">Lista de categorii actualizate.</param>
         /// <returns></returns>
         Task UpdateCategoriesAtAccountAsync(int accountId, IEnumerable<int> categoryIds);
+
+        Task<AccountCategory> GetCategoryByAccountIdAndCategoryIdAsync(int accountId, int categoryId);
     }
 }

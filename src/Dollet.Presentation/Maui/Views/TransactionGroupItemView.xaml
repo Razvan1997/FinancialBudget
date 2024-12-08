@@ -1,43 +1,48 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:Class="Dollet.Views.TransactionGroupItemView">
+<ContentView
+    x:Class="Dollet.Views.TransactionGroupItemView"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
-    <Border
-        Padding="5, 5, 10, 5"
-        Margin="10, 5, 10, 0">
+    <Border Margin="10,5,10,0" Padding="5,5,10,5">
 
         <Border.StrokeShape>
-            <RoundRectangle CornerRadius="15"/>
+            <RoundRectangle CornerRadius="15" />
         </Border.StrokeShape>
 
-        <Grid ColumnDefinitions="auto, *, auto, auto" ColumnSpacing="10">
+        <Grid ColumnDefinitions="auto, *, auto, auto, auto" ColumnSpacing="10">
             <toolkit:AvatarView
+                BackgroundColor="{Binding Color}"
+                FontFamily="MaterialIconsRegular"
                 FontSize="28"
-                WidthRequest="40"
                 HeightRequest="40"
                 Text="{Binding Icon}"
-                FontFamily="MaterialIconsRegular"
-                BackgroundColor="{Binding Color}"/>
+                WidthRequest="40" />
 
-            <Label 
+            <Label
                 Grid.Column="1"
-                Text="{Binding Category}" 
                 FontSize="Large"
-                VerticalOptions="Center"/>
+                Text="{Binding Category}"
+                VerticalOptions="Center" />
 
-            <Label 
+            <Label
                 Grid.Column="2"
+                FontSize="16"
                 Text="{Binding Percent, StringFormat='{0:F2}%'}"
-                FontSize="16"
-                VerticalOptions="Center"/>
+                VerticalOptions="Center" />
 
-            <Label 
+            <Label
                 Grid.Column="3"
-                Text="{Binding Amount, StringFormat='{0:F2} zł'}"
                 FontSize="16"
-                VerticalOptions="Center"/>
+                Text="{Binding Amount, StringFormat='{0:F2}'}"
+                VerticalOptions="Center" />
+
+            <Label
+                Grid.Column="4"
+                FontSize="16"
+                Text="{Binding DefaultCurrency}"
+                VerticalOptions="Center" />
         </Grid>
     </Border>
 </ContentView>

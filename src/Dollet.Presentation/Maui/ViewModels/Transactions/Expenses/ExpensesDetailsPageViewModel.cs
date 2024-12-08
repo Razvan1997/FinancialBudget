@@ -6,6 +6,7 @@ using Dollet.Core.DTOs;
 using Dollet.Core.Entities;
 using Dollet.Helpers;
 using Dollet.Pages.Transactions.Expenses;
+using Dollet.ViewModels.Dtos;
 
 namespace Dollet.ViewModels.Transactions.Expenses
 {
@@ -46,11 +47,27 @@ namespace Dollet.ViewModels.Transactions.Expenses
         [RelayCommand]
         async Task GoToEditExpense(Expense expense)
         {
+            var context = unitOfWork.GetApplicationContext();
+
+            var accounts = await unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
+
+            var category = await unitOfWork.AccountCategoryRepository.GetCategoryByAccountIdAndCategoryIdAsync(accounts.FirstOrDefault().Id, expense.CategoryId);
+
+            var categoryDto = new CategoryDto()
+            {
+                Id = expense.CategoryId,
+                Color = expense.Category.Color,
+                Icon = expense.Category.Icon,
+                Name = expense.Category.Name,
+                IsSelected = false,
+                Budget = category.Budget
+            };
+
             await Shell.Current.GoToAsync($"{nameof(EditExpensePage)}", new ShellNavigationQueryParameters {
                 { "Id", expense.Id},
                 { "Amount", expense.Amount},
                 { "Account", expense.Account},
-                { "SelectedCategory", expense.Category},
+                { "SelectedCategory", categoryDto},
                 { "Date", expense.Date},
                 { "Comment", expense.Comment},
             });

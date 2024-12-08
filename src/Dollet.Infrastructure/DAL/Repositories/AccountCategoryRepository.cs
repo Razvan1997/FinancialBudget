@@ -58,5 +58,11 @@ namespace Dollet.Infrastructure.DAL.Repositories
 
             await _accountCategories.AddRangeAsync(newRelations);
         }
+
+        public async Task<AccountCategory?> GetCategoryByAccountIdAndCategoryIdAsync(int accountId, int categoryId)
+        {
+            return await _accountCategories
+                .FirstOrDefaultAsync(ac => ac.AccountId == accountId && ac.CategoryId == categoryId);
+        }
     }
 }

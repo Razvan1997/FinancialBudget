@@ -8,5 +8,6 @@
         public decimal Percent { get; init; }
         public string Icon { get; init; }
         public string Color { get; init; }
+        public string DefaultCurrency { get; set; }
     }
 }

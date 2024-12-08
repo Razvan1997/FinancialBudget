@@ -51,5 +51,14 @@ namespace Dollet.Views
             get => (double)GetValue(AmountProperty);
             set => SetValue(AmountProperty, value);
         }
+
+        public static readonly BindableProperty DefaultCurrencyProperty =
+            BindableProperty.Create(nameof(DefaultCurrency), typeof(string), typeof(TransactionGroupItemView));
+
+        public string DefaultCurrency
+        {
+            get => (string)GetValue(DefaultCurrencyProperty);
+            set => SetValue(DefaultCurrencyProperty, value);
+        }
     }
 }

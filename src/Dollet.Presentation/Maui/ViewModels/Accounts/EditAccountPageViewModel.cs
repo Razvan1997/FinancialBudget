@@ -20,7 +20,7 @@ namespace Dollet.ViewModels.Accounts
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IPopupService _popupService = popupService;
         private readonly IAccountDomainService _accountService = accountService;
-        private static Users CurrentUser { get; set; }        
+        private static Users CurrentUser { get; set; }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
@@ -45,8 +45,7 @@ namespace Dollet.ViewModels.Accounts
         [ObservableProperty]
         string _password;
 
-        [ObservableProperty]
-        ObservableRangeCollection<CategoryDto> _categories = [];
+        public ObservableRangeCollection<CategoryDto> Categories { get; } = [];
 
         [RelayCommand]
         async Task Appearing()
@@ -64,18 +63,21 @@ namespace Dollet.ViewModels.Accounts
             Password = Account.Password;
 
             var categories = await _unitOfWork.AccountCategoryRepository.GetCategoriesByAccountIdAsync(Account.Id);
+            var allCategoriesExpenses = await _unitOfWork.CategoryRepository.GetAllAsync();
 
-            foreach (var category in categories)
+            foreach (var category in allCategoriesExpenses)
             {
-                var item = _unitOfWork.CategoryRepository.GetCategoryByIdAsync(category.CategoryId).Result;
-                var categoryDto = new CategoryDto()
+                var isSelected = categories.Any(c => c.CategoryId == category.Id);
+
+                var categoryDto = new CategoryDto
                 {
-                    Id = item.Id,
-                    Color = item.Color,
-                    Icon = item.Icon,
-                    Name = item.Name,
-                    IsSelected = false
+                    Id = category.Id,
+                    Color = category.Color,
+                    Icon = category.Icon,
+                    Name = category.Name,
+                    IsSelected = isSelected
                 };
+
                 Categories.Add(categoryDto);
             }
         }

@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dollet.Core.Abstractions;
 using Dollet.Core.Abstractions.Repositories;
 using Dollet.Core.DTOs;
+using Dollet.Core.Entities;
 using Dollet.Core.Helpers;
 using Dollet.Helpers;
 using Dollet.Pages.Transactions.Expenses;
@@ -15,12 +17,26 @@ namespace Dollet.ViewModels.Transactions.Expenses
     {
         private readonly IExpensesRepository _expensesRepository = unitOfWork.ExpensesRepository;
         private readonly IPopupService _popupService = popupService;
-
+        public Currency _defaultCurrency;
         public ObservableRangeCollection<ExpensesGroupDto> Expenses { get; } = [];
-
+        [ObservableProperty]
+        private bool _isVisiblePeriods;
         [RelayCommand]
         async Task Appearing()
         {
+            var context = unitOfWork.GetApplicationContext();
+
+            if (context.Role == Core.Enums.UserType.Normal)
+            {
+                IsVisiblePeriods = false;
+            }
+            else
+            {
+                IsVisiblePeriods = true;
+            }
+
+            _defaultCurrency = await unitOfWork.CurrencyRepository.GetDefaultAsync();
+
             DonutChart = GetDonutChart();
 
             CalculateDateRange();
@@ -72,7 +88,8 @@ namespace Dollet.ViewModels.Transactions.Expenses
                             Amount = groupedSum,
                             Percent = percentValue,
                             Icon = category.Icon,
-                            Color = category.Color
+                            Color = category.Color,
+                            DefaultCurrency = _defaultCurrency.Code
                         });
 
                         entries.Add(new ChartEntry((float)percentValue)

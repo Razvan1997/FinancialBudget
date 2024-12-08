@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Dollet.Core.Abstractions;
 using Dollet.Core.Entities;
 using Dollet.Helpers;
+using Dollet.ViewModels.Dtos;
 
 namespace Dollet.ViewModels.Transactions.Expenses
 {
@@ -25,7 +26,7 @@ namespace Dollet.ViewModels.Transactions.Expenses
         Account _selectedAccount;
         
         [ObservableProperty]
-        Category _selectedCategory;
+        CategoryDto _selectedCategory;
 
         [ObservableProperty]
         DateTime _date;
@@ -36,13 +37,13 @@ namespace Dollet.ViewModels.Transactions.Expenses
         public DateTime MaximumDate { get; } = DateTime.Now;
 
         public ObservableRangeCollection<Account> Accounts { get; } = [];
-        public ObservableRangeCollection<Category> Categories { get; } = [];
+        public ObservableRangeCollection<CategoryDto> Categories { get; } = [];
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             id = (int)query["Id"];
             Amount = (decimal)query["Amount"];
-            SelectedCategory = (Category)query["SelectedCategory"];
+            SelectedCategory = (CategoryDto)query["SelectedCategory"];
             Date = (DateTime)query["Date"];
             Comment = (string)query["Comment"];
 
@@ -53,11 +54,27 @@ namespace Dollet.ViewModels.Transactions.Expenses
         [RelayCommand]
         async Task Appearing()
         {
-            var accounts = await _unitOfWork.AccountRepository.GetAllAsync();
-            var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+            var context = _unitOfWork.GetApplicationContext();
+
+            var accounts = await _unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
+
+            var categories = await _unitOfWork.AccountCategoryRepository.GetCategoriesByAccountIdAsync(accounts.FirstOrDefault().Id);
 
             Accounts.ReplaceRange(accounts);
-            Categories.ReplaceRange(categories);
+            foreach (var category in categories)
+            {
+                var item = _unitOfWork.CategoryRepository.GetCategoryByIdAsync(category.CategoryId).Result;
+                var categoryDto = new CategoryDto()
+                {
+                    Id = item.Id,
+                    Color = item.Color,
+                    Icon = item.Icon,
+                    Name = item.Name,
+                    IsSelected = false,
+                    Budget = category.Budget
+                };
+                Categories.Add(categoryDto);
+            }
 
             var accountIndex = Accounts.IndexOf(Accounts.FirstOrDefault(x => x.Id == initialAccount.Id));
             var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(x => x.Id == SelectedCategory.Id));
@@ -83,9 +100,11 @@ namespace Dollet.ViewModels.Transactions.Expenses
             
             var expense = await _unitOfWork.ExpensesRepository.GetAsync(id);
 
+            var category = await _unitOfWork.CategoryRepository.GetCategoryByIdAsync(SelectedCategory.Id);
+
             expense.Amount = Amount.Value;
             expense.Account = selectedAccount;
-            expense.Category = SelectedCategory;
+            expense.Category = category;
             expense.Date = Date;
             expense.Comment = Comment;
 
