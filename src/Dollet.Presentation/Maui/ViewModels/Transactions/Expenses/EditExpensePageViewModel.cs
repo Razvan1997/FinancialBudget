@@ -56,34 +56,37 @@ namespace Dollet.ViewModels.Transactions.Expenses
         {
             var context = _unitOfWork.GetApplicationContext();
 
-            var accounts = await _unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
-
-            var categories = await _unitOfWork.AccountCategoryRepository.GetCategoriesByAccountIdAsync(accounts.FirstOrDefault().Id);
-
-            Accounts.ReplaceRange(accounts);
-            foreach (var category in categories)
+            if (context.Role == Core.Enums.UserType.Normal)
             {
-                var item = _unitOfWork.CategoryRepository.GetCategoryByIdAsync(category.CategoryId).Result;
-                var categoryDto = new CategoryDto()
+                var accounts = await _unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
+
+                var categories = await _unitOfWork.AccountCategoryRepository.GetCategoriesByAccountIdAsync(accounts.FirstOrDefault().Id);
+
+                Accounts.ReplaceRange(accounts);
+                foreach (var category in categories)
                 {
-                    Id = item.Id,
-                    Color = item.Color,
-                    Icon = item.Icon,
-                    Name = item.Name,
-                    IsSelected = false,
-                    Budget = category.Budget
-                };
-                Categories.Add(categoryDto);
+                    var item = _unitOfWork.CategoryRepository.GetCategoryByIdAsync(category.CategoryId).Result;
+                    var categoryDto = new CategoryDto()
+                    {
+                        Id = item.Id,
+                        Color = item.Color,
+                        Icon = item.Icon,
+                        Name = item.Name,
+                        IsSelected = false,
+                        Budget = category.Budget
+                    };
+                    Categories.Add(categoryDto);
+                }
+
+                var accountIndex = Accounts.IndexOf(Accounts.FirstOrDefault(x => x.Id == initialAccount.Id));
+                var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(x => x.Id == SelectedCategory.Id));
+
+                if (accountIndex > -1)
+                    SelectedAccount = Accounts[accountIndex];
+
+                if (categoryIndex > -1)
+                    SelectedCategory = Categories[categoryIndex];
             }
-
-            var accountIndex = Accounts.IndexOf(Accounts.FirstOrDefault(x => x.Id == initialAccount.Id));
-            var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(x => x.Id == SelectedCategory.Id));
-
-            if(accountIndex > -1)
-                SelectedAccount = Accounts[accountIndex];
-
-            if (categoryIndex > -1)
-                SelectedCategory = Categories[categoryIndex];
         }
 
         [RelayCommand(CanExecute = nameof(CanEditExpense))]

@@ -27,6 +27,17 @@ namespace Dollet.ViewModels
             var users = await _unitOfWork.UserRepository.GetAsync(1);
             var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
             appShellViewModel.IsLogoutVisible = false;
+
+            var currentContext = unitOfWork.GetApplicationContext();
+
+            if(currentContext != null)
+            {
+                var stack = Shell.Current.Navigation.NavigationStack.ToArray();
+                for (int i = stack.Length - 1; i > 0; i--)
+                {
+                    Shell.Current.Navigation.RemovePage(stack[i]);
+                }
+            }
         }
 
         [RelayCommand]
@@ -39,7 +50,10 @@ namespace Dollet.ViewModels
                     var currentUser = await _unitOfWork.UserRepository.GetAsync(1);
 
                     _unitOfWork.SetApplicationContext(currentUser);
-
+                    SetFlyoutItemVisibility("Categorii", true);
+                    SetFlyoutItemVisibility("Monede", true);
+                    SetFlyoutItemVisibility("Setari", true);
+                    SetFlyoutItemVisibility("Portofele", true);
                     await Shell.Current.GoToAsync($"//{nameof(AccountsPage)}");
                     Shell.Current.FlyoutBehavior = FlyoutBehavior.Flyout;
 

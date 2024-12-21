@@ -21,6 +21,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
 
             <ScrollView Margin="0,30,0,0">
@@ -82,6 +83,12 @@
 
             <Button
                 Grid.Row="1"
+                Margin="20"
+                Command="{Binding MakeFotoCommand}"
+                Text="Scaneaza un bon fiscal" />
+
+            <Button
+                Grid.Row="2"
                 Margin="20"
                 Command="{Binding AddExpenseCommand}"
                 Text="Adauga" />

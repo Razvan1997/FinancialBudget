@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dollet.Core.Abstractions;
 using Dollet.Core.Abstractions.Repositories;
@@ -15,12 +16,29 @@ namespace Dollet.ViewModels.Transactions.Incomes
     {
         private readonly IIncomesRepository _incomesRepository = unitOfWork.IncomesRepository;
         private readonly IPopupService _popupService = popupService;
-
+        [ObservableProperty]
+        private bool _isVisiblePeriods;
         public ObservableRangeCollection<IncomesGroupDto> Incomes { get; } = [];
-
+        [ObservableProperty]
+        private bool _isAvailable;
         [RelayCommand]
         async Task Appearing()
         {
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
+            var context = unitOfWork.GetApplicationContext();
+
+            if (context.Role == Core.Enums.UserType.Normal)
+            {
+                IsVisiblePeriods = false;
+                IsAvailable = true;
+            }
+            else
+            {
+                IsVisiblePeriods = true;
+                IsAvailable = false;
+            }
+
             DonutChart = GetDonutChart();
 
             CalculateDateRange();
@@ -50,54 +68,112 @@ namespace Dollet.ViewModels.Transactions.Incomes
             var groupedIncomes = new List<IncomesGroupDto>();
             var entries = new List<ChartEntry>();
 
-            var incomes = await _incomesRepository.GetAllAsync(_dateFrom, _dateTo);
+            var context = unitOfWork.GetApplicationContext();
 
-            if (incomes.Any())
+            if(context.Role == Core.Enums.UserType.Admin)
             {
-                var incomesSum = incomes.Sum(p => p.Amount);
+                var incomes = await _incomesRepository.GetAllAsync(_dateFrom, _dateTo, null, null);
 
-                foreach (var groupedModel in incomes.GroupBy(p => p.CategoryId))
+                if (incomes.Any())
                 {
-                    var groupedSum = groupedModel.Sum(p => p.Amount);
-                    var category = groupedModel.FirstOrDefault()?.Category;
+                    var incomesSum = incomes.Sum(p => p.Amount);
 
-                    if (incomesSum != 0)
+                    foreach (var groupedModel in incomes.GroupBy(p => p.CategoryId))
                     {
-                        var percentValue = groupedSum / incomesSum * 100;
+                        var groupedSum = groupedModel.Sum(p => p.Amount);
+                        var category = groupedModel.FirstOrDefault()?.Category;
 
-                        groupedIncomes.Add(new IncomesGroupDto
+                        if (incomesSum != 0)
                         {
-                            Category = category?.Name,
-                            CategoryId = category?.Id,
-                            Amount = groupedSum,
-                            Percent = percentValue,
-                            Icon = category.Icon,
-                            Color = category.Color
-                        });
+                            var percentValue = groupedSum / incomesSum * 100;
 
-                        entries.Add(new ChartEntry((float)percentValue)
-                        {
-                            Label = category?.Name,
-                            ValueLabel = groupedSum.ToString("0.00"),
-                            Color = SKColor.Parse(category.Color),
-                            ValueLabelColor = SKColor.Parse(category.Color)
-                        });
+                            groupedIncomes.Add(new IncomesGroupDto
+                            {
+                                Category = category?.Name,
+                                CategoryId = category?.Id,
+                                Amount = groupedSum,
+                                Percent = percentValue,
+                                Icon = category.Icon,
+                                Color = category.Color
+                            });
+
+                            entries.Add(new ChartEntry((float)percentValue)
+                            {
+                                Label = category?.Name,
+                                ValueLabel = groupedSum.ToString("0.00"),
+                                Color = SKColor.Parse(category.Color),
+                                ValueLabelColor = SKColor.Parse(category.Color)
+                            });
+                        }
                     }
-                }
 
-                Incomes.AddRange(groupedIncomes.OrderByDescending(x => x.Amount));
-                DonutChart = GetDonutChart(entries);
+                    Incomes.AddRange(groupedIncomes.OrderByDescending(x => x.Amount));
+                    DonutChart = GetDonutChart(entries);
+                }
+                else
+                {
+                    entries.Add(new ChartEntry(100)
+                    {
+                        Label = "No data",
+                        ValueLabel = "0",
+                        Color = SKColor.Parse("#ACACAC")
+                    });
+
+                    DonutChart = GetDonutChart(entries);
+                }
             }
             else
             {
-                entries.Add(new ChartEntry(100)
-                {
-                    Label = "No data",
-                    ValueLabel = "0",
-                    Color = SKColor.Parse("#ACACAC")
-                });
+                var accounts = await unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
+                var incomes = await _incomesRepository.GetAllAsync(_dateFrom, _dateTo, null, accounts.FirstOrDefault().Id);
 
-                DonutChart = GetDonutChart(entries);
+                if (incomes.Any())
+                {
+                    var incomesSum = incomes.Sum(p => p.Amount);
+
+                    foreach (var groupedModel in incomes.GroupBy(p => p.CategoryId))
+                    {
+                        var groupedSum = groupedModel.Sum(p => p.Amount);
+                        var category = groupedModel.FirstOrDefault()?.Category;
+
+                        if (incomesSum != 0)
+                        {
+                            var percentValue = groupedSum / incomesSum * 100;
+
+                            groupedIncomes.Add(new IncomesGroupDto
+                            {
+                                Category = category?.Name,
+                                CategoryId = category?.Id,
+                                Amount = groupedSum,
+                                Percent = percentValue,
+                                Icon = category.Icon,
+                                Color = category.Color
+                            });
+
+                            entries.Add(new ChartEntry((float)percentValue)
+                            {
+                                Label = category?.Name,
+                                ValueLabel = groupedSum.ToString("0.00"),
+                                Color = SKColor.Parse(category.Color),
+                                ValueLabelColor = SKColor.Parse(category.Color)
+                            });
+                        }
+                    }
+
+                    Incomes.AddRange(groupedIncomes.OrderByDescending(x => x.Amount));
+                    DonutChart = GetDonutChart(entries);
+                }
+                else
+                {
+                    entries.Add(new ChartEntry(100)
+                    {
+                        Label = "No data",
+                        ValueLabel = "0",
+                        Color = SKColor.Parse("#ACACAC")
+                    });
+
+                    DonutChart = GetDonutChart(entries);
+                }
             }
         }
 

@@ -52,7 +52,21 @@ namespace Dollet.Infrastructure.DAL.Repositories
 
         public void Update(Account account)
         {
-            _accounts.Update(account);
+            var trackedEntity = _accounts.Local.FirstOrDefault(a => a.Id == account.Id);
+
+            if (trackedEntity != null)
+            {
+                dbContext.Entry(trackedEntity).CurrentValues.SetValues(account);
+            }
+            else
+            {
+                _accounts.Update(account);
+            }
+        }
+
+        public async Task<Account> GetByIdAsync(int id)
+        {
+            return await _accounts.FirstOrDefaultAsync(a => a.Id == id);
         }
     }
 }

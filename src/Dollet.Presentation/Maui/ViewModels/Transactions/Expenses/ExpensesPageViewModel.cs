@@ -21,18 +21,24 @@ namespace Dollet.ViewModels.Transactions.Expenses
         public ObservableRangeCollection<ExpensesGroupDto> Expenses { get; } = [];
         [ObservableProperty]
         private bool _isVisiblePeriods;
+        [ObservableProperty]
+        private bool _isAvailable;
         [RelayCommand]
         async Task Appearing()
         {
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
             var context = unitOfWork.GetApplicationContext();
 
             if (context.Role == Core.Enums.UserType.Normal)
             {
                 IsVisiblePeriods = false;
+                IsAvailable = true;
             }
             else
             {
                 IsVisiblePeriods = true;
+                IsAvailable = false;
             }
 
             _defaultCurrency = await unitOfWork.CurrencyRepository.GetDefaultAsync();
@@ -66,55 +72,112 @@ namespace Dollet.ViewModels.Transactions.Expenses
             var groupedExpenses = new List<ExpensesGroupDto>();
             var entries = new List<ChartEntry>();
 
-            var expenses = await _expensesRepository.GetAllAsync(_dateFrom, _dateTo);
+            var context = unitOfWork.GetApplicationContext();
 
-            if (expenses.Any())
+            if (context.Role == Core.Enums.UserType.Admin)
             {
-                var expensesSum = expenses.Sum(p => p.Amount);
-
-                foreach (var groupedModel in expenses.GroupBy(p => p.CategoryId))
+                var expenses = await _expensesRepository.GetAllAsync(_dateFrom, _dateTo, null, null);
+                if (expenses.Any())
                 {
-                    var groupedSum = groupedModel.Sum(p => p.Amount);
-                    var category = groupedModel.FirstOrDefault()?.Category;
+                    var expensesSum = expenses.Sum(p => p.Amount);
 
-                    if (expensesSum != 0)
+                    foreach (var groupedModel in expenses.GroupBy(p => p.CategoryId))
                     {
-                        var percentValue = groupedSum / expensesSum * 100;
+                        var groupedSum = groupedModel.Sum(p => p.Amount);
+                        var category = groupedModel.FirstOrDefault()?.Category;
 
-                        groupedExpenses.Add(new ExpensesGroupDto
+                        if (expensesSum != 0)
                         {
-                            Category = category?.Name,
-                            CategoryId = category?.Id,
-                            Amount = groupedSum,
-                            Percent = percentValue,
-                            Icon = category.Icon,
-                            Color = category.Color,
-                            DefaultCurrency = _defaultCurrency.Code
-                        });
+                            var percentValue = groupedSum / expensesSum * 100;
 
-                        entries.Add(new ChartEntry((float)percentValue)
-                        {
-                            Label = category?.Name,
-                            ValueLabel = groupedSum.ToString("0.00"),
-                            Color = SKColor.Parse(category.Color),
-                            ValueLabelColor = SKColor.Parse(category.Color)
-                        });
+                            groupedExpenses.Add(new ExpensesGroupDto
+                            {
+                                Category = category?.Name,
+                                CategoryId = category?.Id,
+                                Amount = groupedSum,
+                                Percent = percentValue,
+                                Icon = category.Icon,
+                                Color = category.Color,
+                                DefaultCurrency = _defaultCurrency.Code
+                            });
+
+                            entries.Add(new ChartEntry((float)percentValue)
+                            {
+                                Label = category?.Name,
+                                ValueLabel = groupedSum.ToString("0.00"),
+                                Color = SKColor.Parse(category.Color),
+                                ValueLabelColor = SKColor.Parse(category.Color)
+                            });
+                        }
                     }
-                }
 
-                Expenses.AddRange(groupedExpenses.OrderByDescending(x => x.Amount));
-                DonutChart = GetDonutChart(entries);
+                    Expenses.AddRange(groupedExpenses.OrderByDescending(x => x.Amount));
+                    DonutChart = GetDonutChart(entries);
+                }
+                else
+                {
+                    entries.Add(new ChartEntry(100)
+                    {
+                        Label = "No data",
+                        ValueLabel = "0",
+                        Color = SKColor.Parse("#ACACAC")
+                    });
+
+                    DonutChart = GetDonutChart(entries);
+                }
             }
             else
             {
-                entries.Add(new ChartEntry(100)
+                var accounts = await unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
+                var expenses = await _expensesRepository.GetAllAsync(_dateFrom, _dateTo, null, accounts.FirstOrDefault().Id);
+                if (expenses.Any())
                 {
-                    Label = "No data",
-                    ValueLabel = "0",
-                    Color = SKColor.Parse("#ACACAC")
-                });
+                    var expensesSum = expenses.Sum(p => p.Amount);
 
-                DonutChart = GetDonutChart(entries);
+                    foreach (var groupedModel in expenses.GroupBy(p => p.CategoryId))
+                    {
+                        var groupedSum = groupedModel.Sum(p => p.Amount);
+                        var category = groupedModel.FirstOrDefault()?.Category;
+
+                        if (expensesSum != 0)
+                        {
+                            var percentValue = groupedSum / expensesSum * 100;
+
+                            groupedExpenses.Add(new ExpensesGroupDto
+                            {
+                                Category = category?.Name,
+                                CategoryId = category?.Id,
+                                Amount = groupedSum,
+                                Percent = percentValue,
+                                Icon = category.Icon,
+                                Color = category.Color,
+                                DefaultCurrency = _defaultCurrency.Code
+                            });
+
+                            entries.Add(new ChartEntry((float)percentValue)
+                            {
+                                Label = category?.Name,
+                                ValueLabel = groupedSum.ToString("0.00"),
+                                Color = SKColor.Parse(category.Color),
+                                ValueLabelColor = SKColor.Parse(category.Color)
+                            });
+                        }
+                    }
+
+                    Expenses.AddRange(groupedExpenses.OrderByDescending(x => x.Amount));
+                    DonutChart = GetDonutChart(entries);
+                }
+                else
+                {
+                    entries.Add(new ChartEntry(100)
+                    {
+                        Label = "No data",
+                        ValueLabel = "0",
+                        Color = SKColor.Parse("#ACACAC")
+                    });
+
+                    DonutChart = GetDonutChart(entries);
+                }
             }
         }
 

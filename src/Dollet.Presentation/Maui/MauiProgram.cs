@@ -7,6 +7,7 @@ using Dollet.PlatformSpecifics.Renderers;
 using Microcharts.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Maui.LifecycleEvents;
+using Plugin.Maui.OCR;
 using System.Reflection;
 
 namespace Dollet
@@ -23,6 +24,7 @@ namespace Dollet
                     fonts.AddFont("VactorySans-Regular.ttf", "VactorySansRegular");
                     fonts.AddFont("MaterialIcons-Regular.ttf", "MaterialIconsRegular");
                 })
+                .UseOcr()
                 .UseMicrocharts()
                 .UseMauiCommunityToolkit()
                 .ConfigureMauiHandlers(handlers =>
@@ -57,6 +59,8 @@ namespace Dollet
             builder.Services.AddCore();
             builder.Services.AddInfrastructure(builder.Configuration);
 
+            builder.Services.AddSingleton<IOcrService>(Plugin.Maui.OCR.OcrPlugin.Default);
+
             return builder.Build();
         }
 
@@ -69,17 +73,17 @@ namespace Dollet
 
         private static void ConfigureEvents(ILifecycleBuilder events)
         {
-            events.AddAndroid(android =>
-            {
-                android.OnCreate((activity, bundle) =>
-                {
-                    BaseActivity.Set(activity);
-                    Application.Current.RequestedThemeChanged += AppThemeChanged;
-                });
-            });
+            //events.AddAndroid(android =>
+            //{
+            //    android.OnCreate((activity, bundle) =>
+            //    {
+            //        BaseActivity.Set(activity);
+            //        Application.Current.RequestedThemeChanged += AppThemeChanged;
+            //    });
+            //});
         }
 
-        private static void AppThemeChanged(object sender, AppThemeChangedEventArgs e)
-            => BaseActivity.SetNavigationBarColor();
+        //private static void AppThemeChanged(object sender, AppThemeChangedEventArgs e)
+        //    => BaseActivity.SetNavigationBarColor();
     }
 }

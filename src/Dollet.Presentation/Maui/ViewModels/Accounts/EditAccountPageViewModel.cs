@@ -121,9 +121,8 @@ namespace Dollet.ViewModels.Accounts
                     .Make(ex.Message, ToastDuration.Long, 14)
                     .Show();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
             }
         }
 

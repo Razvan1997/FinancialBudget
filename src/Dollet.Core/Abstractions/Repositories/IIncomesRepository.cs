@@ -4,7 +4,7 @@ namespace Dollet.Core.Abstractions.Repositories
 {
     public interface IIncomesRepository
     {
-        Task<IEnumerable<Income>> GetAllAsync(DateTime? from = null, DateTime? to = null, int? categoryId = null);
+        Task<IEnumerable<Income>> GetAllAsync(DateTime? from = null, DateTime? to = null, int? categoryId = null, int? accountId = null);
         Task<Income?> GetAsync(int id);
         void Add(Income income);
         void Update(Income income);

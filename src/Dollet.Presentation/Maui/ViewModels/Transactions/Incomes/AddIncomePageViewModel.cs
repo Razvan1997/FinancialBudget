@@ -32,6 +32,8 @@ namespace Dollet.ViewModels.Transactions.Incomes
         [RelayCommand]
         async Task Appearing()
         {
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
             var accounts = await _accountRepository.GetAllAsync();
             var categories = await _categoryRepository.GetAllAsync(CategoryType.Income);
 

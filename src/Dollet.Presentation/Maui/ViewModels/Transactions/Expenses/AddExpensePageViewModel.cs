@@ -6,6 +6,9 @@ using Dollet.Core.Abstractions;
 using Dollet.Core.Entities;
 using Dollet.Helpers;
 using Dollet.ViewModels.Dtos;
+using Plugin.Maui.OCR;
+using System.Text.RegularExpressions;
+
 
 namespace Dollet.ViewModels.Transactions.Expenses
 {
@@ -27,6 +30,8 @@ namespace Dollet.ViewModels.Transactions.Expenses
         [RelayCommand]
         async Task Appearing()
         {
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
             var context = _unitOfWork.GetApplicationContext();
 
             var accounts = await _unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password) ;
@@ -50,6 +55,8 @@ namespace Dollet.ViewModels.Transactions.Expenses
             }
 
             SelectedAccount = accounts.FirstOrDefault(x => x.IsDefault);
+
+            await OcrPlugin.Default.InitAsync();
         }
 
         [RelayCommand]
@@ -58,7 +65,13 @@ namespace Dollet.ViewModels.Transactions.Expenses
             var selectedAccount = Accounts.FirstOrDefault(x => x.Id == SelectedAccount.Id);
             var selectedCategory = Categories.FirstOrDefault( x=> x.Id == SelectedCategory.Id);
 
-            if(Amount > selectedCategory.Budget)
+            if (SelectedAccount == null)
+            {
+                await Application.Current.MainPage.DisplayAlert("Eroare", "Trebuie sa selectezi contul.", "OK");
+                return;
+            }
+
+            if (Amount > selectedCategory.Budget)
             {
                 await Application.Current.MainPage.DisplayAlert("Eroare", "Suma introdusa depaseste bugetul pe categoria selectata.", "OK");
                 return;
@@ -91,5 +104,89 @@ namespace Dollet.ViewModels.Transactions.Expenses
                 }
             }
         }
+
+        [RelayCommand]
+        async Task<string> MakeFoto()
+        {
+            var photoPath = await TakePhotoAsync();
+            if (photoPath != null)
+            {
+                var result = await ExtractTotalPriceFromImagePath(photoPath);
+            }
+            return "Nu s-a putut face poza.";
+        }
+
+        public async Task<string> ExtractTotalPriceFromImagePath(string imagePath)
+        {
+            try
+            {
+                var imageBytes = await File.ReadAllBytesAsync(imagePath);
+
+                var ocrResult = await OcrPlugin.Default.RecognizeTextAsync(imageBytes);
+
+                if (ocrResult.Success)
+                {
+                    await Application.Current.MainPage.DisplayAlert("",ocrResult.AllText,"OK");
+                    var totalPrice = ExtractTotalPrice(ocrResult.AllText);
+
+                    if (!string.IsNullOrEmpty(totalPrice))
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Preț Total Detectat", totalPrice, "OK");
+                        return totalPrice;
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Preț Neidentificat", "Nu s-a găsit prețul total.", "OK");
+                    }
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("OCR Eșuat", "Nu s-a putut extrage textul.", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Eroare", ex.Message, "OK");
+            }
+
+            return "Prețul nu a fost găsit.";
+        }
+
+        public async Task<string> TakePhotoAsync()
+        {
+            try
+            {
+                FileResult photo = await MediaPicker.Default.CapturePhotoAsync();
+
+                if (photo != null)
+                {
+                    var localFilePath = Path.Combine(FileSystem.CacheDirectory, photo.FileName);
+
+                    using var stream = await photo.OpenReadAsync();
+                    using var newStream = File.OpenWrite(localFilePath);
+                    await stream.CopyToAsync(newStream);
+
+                    return localFilePath;  // Returnează calea imaginii
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Eroare la accesarea camerei: {ex.Message}");
+            }
+            return null;
+        }
+
+        private string ExtractTotalPrice(string ocrText)
+        {
+            // Modificare Regex pentru a permite "TOTAL" sau "TOTAL LEI"
+            var match = Regex.Match(ocrText, @"\bTOTAL(?:\s*LEI)?\s*([\d.,]+)");
+
+            if (match.Success)
+            {
+                return match.Groups[1].Value;  // Returnează doar valoarea numerica
+            }
+            return null;
+        }
+
     }
 }

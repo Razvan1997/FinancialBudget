@@ -4,6 +4,7 @@ using Dollet.Core.Abstractions.Repositories;
 using Dollet.Core.Entities;
 using Dollet.Core.Exceptions;
 using Dollet.Core.ExtensionMethods;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dollet.Core.Services
 {
@@ -11,6 +12,7 @@ namespace Dollet.Core.Services
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IAccountRepository _accountRepository = unitOfWork.AccountRepository;
+        private readonly DbContext _dbContext = unitOfWork.GetDbContext();
 
         public async Task<bool> CreateAsync(Account newAccount, bool isDefault = false)
         {
@@ -71,27 +73,41 @@ namespace Dollet.Core.Services
             existingAccount.Name.ToFirstUpper();
             existingAccount.Description.ToFirstUpper();
 
+            // Caută entitatea deja urmărită în DbContext
+            var trackedAccount = await _accountRepository.GetByIdAsync(existingAccount.Id);
+
+            if (trackedAccount == null)
+            {
+                throw new InvalidOperationException("Account not found.");
+            }
+
+            // Actualizează entitatea urmărită cu noile valori
+            _dbContext.Entry(trackedAccount).CurrentValues.SetValues(existingAccount);
+
+            // Logica pentru schimbarea contului implicit
             var defaultAccount = await _accountRepository.GetDefaultAsync();
 
-            if (isDefault && !existingAccount.IsDefault)
+            if (isDefault && !trackedAccount.IsDefault)
             {
-                if (defaultAccount != null && defaultAccount.Id != existingAccount.Id)
+                if (defaultAccount != null && defaultAccount.Id != trackedAccount.Id)
                 {
                     defaultAccount.UnsetAsDefault();
                     _accountRepository.Update(defaultAccount);
                 }
-                existingAccount.SetAsDefault();
+                trackedAccount.SetAsDefault();
             }
-            else if (!isDefault && existingAccount.IsDefault)
+            else if (!isDefault && trackedAccount.IsDefault)
             {
-                if (defaultAccount == null || defaultAccount.Id == existingAccount.Id)
+                if (defaultAccount == null || defaultAccount.Id == trackedAccount.Id)
                 {
                     throw new RequireOneDefaultAccountException();
                 }
-                existingAccount.UnsetAsDefault();
+                trackedAccount.UnsetAsDefault();
             }
 
-            _accountRepository.Update(existingAccount);
+            // Updatează entitatea urmărită (nu atașăm `existingAccount` direct)
+            _accountRepository.Update(trackedAccount);
+
             return await _unitOfWork.CommitAsync();
         }
 

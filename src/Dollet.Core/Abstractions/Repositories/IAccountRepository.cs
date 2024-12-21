@@ -13,5 +13,6 @@ namespace Dollet.Core.Abstractions.Repositories
         void Add(Account account);
         void Delete(Account account);
         void Update(Account account);
+        Task<Account> GetByIdAsync(int id);
     }
 }

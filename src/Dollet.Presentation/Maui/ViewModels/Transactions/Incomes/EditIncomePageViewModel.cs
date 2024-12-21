@@ -57,20 +57,27 @@ namespace Dollet.ViewModels.Transactions.Incomes
         [RelayCommand]
         async Task Appearing()
         {
-            var accounts = await _accountRepository.GetAllAsync();
-            var categories = await _categoryRepository.GetAllAsync(CategoryType.Income);
+            var context = _unitOfWork.GetApplicationContext();
 
-            Accounts.ReplaceRange(accounts);
-            Categories.ReplaceRange(categories);
+            if (context.Role == Core.Enums.UserType.Normal)
+            {
+                var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+                appShellViewModel.IsLogoutVisible = false;
+                var accounts = await _accountRepository.GetAllAsync();
+                var categories = await _categoryRepository.GetAllAsync(CategoryType.Income);
 
-            var accountIndex = Accounts.IndexOf(Accounts.FirstOrDefault(x => x.Id == initialAccount.Id));
-            var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(x => x.Id == SelectedCategory.Id));
+                Accounts.ReplaceRange(accounts);
+                Categories.ReplaceRange(categories);
 
-            if (accountIndex > -1)
-                SelectedAccount = Accounts[accountIndex];
+                var accountIndex = Accounts.IndexOf(Accounts.FirstOrDefault(x => x.Id == initialAccount.Id));
+                var categoryIndex = Categories.IndexOf(Categories.FirstOrDefault(x => x.Id == SelectedCategory.Id));
 
-            if (categoryIndex > -1)
-                SelectedCategory = Categories[categoryIndex];
+                if (accountIndex > -1)
+                    SelectedAccount = Accounts[accountIndex];
+
+                if (categoryIndex > -1)
+                    SelectedCategory = Categories[categoryIndex];
+            }
         }
 
         [RelayCommand]

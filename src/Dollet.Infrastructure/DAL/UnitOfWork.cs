@@ -34,10 +34,7 @@ namespace Dollet.Infrastructure.DAL
         {
             var saved = await _dbContext.SaveChangesAsync() > 0;
 
-            foreach(var entry in _dbContext.ChangeTracker.Entries().ToArray())
-            {
-                entry.State = EntityState.Detached;
-            }
+            _dbContext.ChangeTracker.Clear();
 
             return saved;
         }
@@ -46,6 +43,11 @@ namespace Dollet.Infrastructure.DAL
         {
             get => _currentUserContext;
             private set => _currentUserContext = value;
+        }
+
+        public DbContext GetDbContext()
+        {
+            return _dbContext;
         }
 
         public void SetApplicationContext(Users currentUser)

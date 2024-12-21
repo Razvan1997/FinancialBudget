@@ -1,5 +1,6 @@
 ﻿using Dollet.Core.Abstractions.Repositories;
 using Dollet.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dollet.Core.Abstractions
 {
@@ -16,5 +17,6 @@ namespace Dollet.Core.Abstractions
         Task<bool> CommitAsync();
         void SetApplicationContext(Users currentUser);
         Users GetApplicationContext();
+        DbContext GetDbContext();
     }
 }

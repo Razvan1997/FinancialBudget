@@ -116,6 +116,7 @@
                 FontFamily="MaterialIconsRegular"
                 FontSize="32"
                 HeightRequest="60"
+                IsVisible="{Binding IsAvailable}"
                 Text="{x:Static fonts:MaterialDesignIcons.Add}"
                 VerticalOptions="End"
                 WidthRequest="60"

@@ -27,7 +27,7 @@ namespace Dollet.Infrastructure.DAL.Repositories
             _dbContext.Incomes.RemoveRange(toDelete);
         }
 
-        public async Task<IEnumerable<Income>> GetAllAsync(DateTime? from = null, DateTime? to = null, int? categoryId = null)
+        public async Task<IEnumerable<Income>> GetAllAsync(DateTime? from = null, DateTime? to = null, int? categoryId = null, int? accountId = null)
         {
             var query = _dbContext.Incomes
                 .Include(x => x.Category)
@@ -36,7 +36,7 @@ namespace Dollet.Infrastructure.DAL.Repositories
 
             if (from.HasValue && to.HasValue)
             {
-                query = query.Where(x => 
+                query = query.Where(x =>
                     x.Date >= from.Value &&
                     x.Date <= to.Value);
             }
@@ -44,6 +44,11 @@ namespace Dollet.Infrastructure.DAL.Repositories
             if (categoryId.HasValue)
             {
                 query = query.Where(x => x.CategoryId == categoryId.Value);
+            }
+
+            if (accountId.HasValue)
+            {
+                query = query.Where(x => x.AccountId == accountId.Value);
             }
 
             return await query.ToListAsync();

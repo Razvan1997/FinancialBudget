@@ -13,7 +13,7 @@ namespace Dollet.ViewModels.Transactions.Expenses
     public partial class ExpensesDetailsPageViewModel(IUnitOfWork unitOfWork) : ObservableObject, IQueryAttributable
     {
         private readonly IExpensesRepository _expensesRepository = unitOfWork.ExpensesRepository;
-        
+
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
             DateFrom = (DateTime)query["DateFrom"];
@@ -31,16 +31,36 @@ namespace Dollet.ViewModels.Transactions.Expenses
         [RelayCommand]
         async Task Appearing()
         {
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
             Expenses.Clear();
 
-            var expenses = await _expensesRepository.GetAllAsync(DateFrom, DateTo, _categoryId);
-            var expensesByDate = expenses
-                .GroupBy(p => p.Date)
-                .OrderByDescending(p => p.Key);
+            var context = unitOfWork.GetApplicationContext();
+            var accounts = await unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
 
-            foreach (var groupedModel in expensesByDate)
+            if (context.Role == Core.Enums.UserType.Admin)
             {
-                Expenses.Add(new ExpensesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                var expenses = await _expensesRepository.GetAllAsync(DateFrom, DateTo, _categoryId, null);
+                var expensesByDate = expenses
+                    .GroupBy(p => p.Date)
+                    .OrderByDescending(p => p.Key);
+
+                foreach (var groupedModel in expensesByDate)
+                {
+                    Expenses.Add(new ExpensesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                }
+            }
+            else
+            {
+                var expenses = await _expensesRepository.GetAllAsync(DateFrom, DateTo, _categoryId, accounts.FirstOrDefault().Id);
+                var expensesByDate = expenses
+                    .GroupBy(p => p.Date)
+                    .OrderByDescending(p => p.Key);
+
+                foreach (var groupedModel in expensesByDate)
+                {
+                    Expenses.Add(new ExpensesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                }
             }
         }
 

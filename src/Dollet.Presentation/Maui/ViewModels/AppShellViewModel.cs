@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Dollet.Core.Abstractions;
 using Dollet.Core.Abstractions.Repositories;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Dollet.ViewModels
 {
@@ -55,7 +56,12 @@ namespace Dollet.ViewModels
         public async Task Logout()
         {
             unitOfWork.SetApplicationContext(null);
-            await Shell.Current.GoToAsync("LoginPage");
+            var stack = Shell.Current.Navigation.NavigationStack.ToArray();
+            for (int i = stack.Length - 1; i > 0; i--)
+            {
+                Shell.Current.Navigation.RemovePage(stack[i]);
+            }
+            await Shell.Current.GoToAsync("LoginPage",true);
         }
 
         [RelayCommand]

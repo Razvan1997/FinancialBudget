@@ -12,12 +12,12 @@ namespace Dollet.ViewModels.Transactions.Incomes
     public partial class IncomesDetailsPageViewModel(IUnitOfWork unitOfWork) : ObservableObject, IQueryAttributable
     {
         private readonly IIncomesRepository _incomesRepository = unitOfWork.IncomesRepository;
-        
+
         private int _categoryId;
 
         [ObservableProperty]
         private DateTime _dateFrom, _dateTo;
-        
+
         public ObservableRangeCollection<IncomesDetailsGroupDto> Incomes { get; private set; } = [];
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -30,15 +30,37 @@ namespace Dollet.ViewModels.Transactions.Incomes
         [RelayCommand]
         async Task Appearing()
         {
-            var incomes = await _incomesRepository.GetAllAsync(DateFrom, DateTo, _categoryId);
+            var appShellViewModel = Shell.Current.BindingContext as AppShellViewModel;
+            appShellViewModel.IsLogoutVisible = false;
 
-            var incomesByDate = incomes
-                .GroupBy(p => p.Date)
-                .OrderByDescending(p => p.Key);
+            var context = unitOfWork.GetApplicationContext();
+            var accounts = await unitOfWork.AccountRepository.GetAsyncByUserAndPass(context.Name, context.Password);
 
-            foreach (var groupedModel in incomesByDate)
+            if (context.Role == Core.Enums.UserType.Admin)
             {
-                Incomes.Replace(new IncomesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                var incomes = await _incomesRepository.GetAllAsync(DateFrom, DateTo, _categoryId, null);
+
+                var incomesByDate = incomes
+                    .GroupBy(p => p.Date)
+                    .OrderByDescending(p => p.Key);
+
+                foreach (var groupedModel in incomesByDate)
+                {
+                    Incomes.Replace(new IncomesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                }
+            }
+            else
+            {
+                var incomes = await _incomesRepository.GetAllAsync(DateFrom, DateTo, _categoryId, accounts.FirstOrDefault().Id);
+
+                var incomesByDate = incomes
+                    .GroupBy(p => p.Date)
+                    .OrderByDescending(p => p.Key);
+
+                foreach (var groupedModel in incomesByDate)
+                {
+                    Incomes.Replace(new IncomesDetailsGroupDto(groupedModel.Key, [.. groupedModel]));
+                }
             }
         }
 
